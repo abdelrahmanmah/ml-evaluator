@@ -24,6 +24,106 @@ OVERFIT_THRESHOLD   = 0.10   # train−val gap
 HIGH_BIAS_THRESHOLD = 0.15   # 1 − val_accuracy
 
 
+# ── Silent result container ───────────────────────────────────────────────────
+class _Result:
+    """
+    A dict-like container that prints nothing in Jupyter notebooks.
+
+    Functions like ev.metrics() and ev.bv_stats() return this so their
+    output isn't auto-displayed as a raw dict. You can still access all
+    data normally: r["accuracy"], r["diagnosis"], r.get("f1"), etc.
+
+    Usage
+    -----
+    ev.metrics(rf, X_test, y_test)                  # prints cleanly, no dict shown
+    m = ev.metrics(rf, X_test, y_test)              # store result
+    print(m["accuracy"])                             # access any key
+    dict(m)                                          # convert to plain dict
+    """
+
+    def __init__(self, data: dict):
+        self._data = data
+
+    # ── dict-like access ──────────────────────────────────────────
+    def __getitem__(self, key):        return self._data[key]
+    def __setitem__(self, key, value): self._data[key] = value
+    def __contains__(self, key):       return key in self._data
+    def __iter__(self):                return iter(self._data)
+    def __len__(self):                 return len(self._data)
+    def keys(self):                    return self._data.keys()
+    def values(self):                  return self._data.values()
+    def items(self):                   return self._data.items()
+    def get(self, key, default=None):  return self._data.get(key, default)
+
+    # ── suppress Jupyter auto-display ────────────────────────────
+    def __repr__(self):  return ""
+    def __str__(self):   return ""
+
+    # ── convert to plain dict when needed ────────────────────────
+    def to_dict(self):   return dict(self._data)
+
+
+class _ResultDF:
+    """
+    A pandas DataFrame wrapper that prints nothing in Jupyter notebooks.
+
+    Functions like ev.compare_metrics() return this so the DataFrame
+    isn't auto-displayed. You can still use all normal DataFrame operations:
+    df["F1"], df.idxmax(), df.values, for row in df.iterrows(), etc.
+
+    Usage
+    -----
+    ev.compare_metrics(models, X_test, y_test)          # prints table, no display
+    df = ev.compare_metrics(models, X_test, y_test)     # store result
+    print(df["F1"].idxmax())                             # use like normal DataFrame
+    df.to_dataframe()                                    # get plain pandas DataFrame
+    """
+
+    def __init__(self, df):
+        self._df = df
+
+    # ── delegate all DataFrame operations ────────────────────────
+    def __getitem__(self, key):       return self._df[key]
+    def __setitem__(self, key, val):  self._df[key] = val
+    def __len__(self):                return len(self._df)
+    def __iter__(self):               return iter(self._df)
+    def __contains__(self, key):      return key in self._df
+
+    # delegate common DataFrame attributes and methods
+    @property
+    def columns(self):   return self._df.columns
+    @property
+    def index(self):     return self._df.index
+    @property
+    def values(self):    return self._df.values
+    @property
+    def shape(self):     return self._df.shape
+
+    def idxmax(self, *a, **kw):      return self._df.idxmax(*a, **kw)
+    def idxmin(self, *a, **kw):      return self._df.idxmin(*a, **kw)
+    def iterrows(self):              return self._df.iterrows()
+    def loc(self, *a, **kw):         return self._df.loc[*a]
+    def get(self, key, default=None):return self._df.get(key, default)
+    def items(self):                 return self._df.items()
+
+    # ── suppress Jupyter auto-display ────────────────────────────
+    def __repr__(self):  return ""
+    def __str__(self):   return ""
+
+    # ── convert to plain DataFrame ───────────────────────────────
+    def to_dataframe(self): return self._df
+
+# ── Default palette ────────────────────────────────────────────────────────────
+DEFAULT_COLORS = [
+    "#2E75B6", "#2ECC71", "#E67E22", "#E74C3C",
+    "#9B59B6", "#1ABC9C", "#F39C12", "#3498DB",
+]
+
+# ── Diagnosis thresholds ───────────────────────────────────────────────────────
+OVERFIT_THRESHOLD   = 0.10   # train−val gap
+HIGH_BIAS_THRESHOLD = 0.15   # 1 − val_accuracy
+
+
 def get_colors(n: int):
     """Return n colors, cycling the palette if needed."""
     return [DEFAULT_COLORS[i % len(DEFAULT_COLORS)] for i in range(n)]

@@ -17,7 +17,7 @@ from sklearn.metrics import (
     roc_curve, auc,
 )
 
-from ._utils import DEFAULT_COLORS, compute_metrics, styled_box, add_panel_label
+from ._utils import DEFAULT_COLORS, compute_metrics, styled_box, add_panel_label, _Result
 
 warnings.filterwarnings("ignore")
 
@@ -31,20 +31,20 @@ __all__ = [
 
 # ── 1. metrics() ──────────────────────────────────────────────────────────────
 
-def metrics(model, X_test, y_test, *, model_name="Model", verbose=True, return_data=False):
+def metrics(model, X_test, y_test, *, model_name="Model", verbose=True):
     """Compute and print metrics. No plot.
-    Returns dict if return_data=True, else None."""
+    Returns a Result object — access data with m["accuracy"], m["f1"], etc."""
     m = compute_metrics(model, X_test, y_test)
     if verbose:
         _print_metrics(model_name, m)
-    if return_data:
-        return m
+    return _Result(m)
 
 
 # ── 2. interpret() ────────────────────────────────────────────────────────────
 
-def interpret(model, X_test, y_test, *, model_name="Model", verbose=True) -> str:
-    """Print plain-English interpretation. No plot. Returns str."""
+def interpret(model, X_test, y_test, *, model_name="Model", verbose=True):
+    """Print plain-English interpretation. No plot.
+    Returns a Result object — access text with r.text or str(r)."""
     m    = compute_metrics(model, X_test, y_test)
     text = _build_interpretation(m)
     if verbose:
@@ -53,7 +53,7 @@ def interpret(model, X_test, y_test, *, model_name="Model", verbose=True) -> str
         for line in text.splitlines():
             print(f"  {line}")
         print()
-    return text
+    return _Result({"text": text})
 
 
 # ── 3. plot_confusion_matrix() ────────────────────────────────────────────────

@@ -33,7 +33,7 @@ from sklearn.model_selection import StratifiedKFold, learning_curve
 from ._utils import (
     DEFAULT_COLORS, get_colors,
     OVERFIT_THRESHOLD, HIGH_BIAS_THRESHOLD,
-    diagnose_bv, styled_box, add_panel_label,
+    diagnose_bv, styled_box, add_panel_label, _Result,
 )
 
 warnings.filterwarnings("ignore")
@@ -102,7 +102,6 @@ def bv_stats(
     overfit_threshold:   float = OVERFIT_THRESHOLD,
     high_bias_threshold: float = HIGH_BIAS_THRESHOLD,
     verbose:             bool  = True,
-    return_data:         bool  = False,
 ):
     """
     Compute and print Bias–Variance stats for one model.
@@ -143,8 +142,7 @@ def bv_stats(
     if verbose:
         _print_bv(model_name, r)
 
-    if return_data:
-        return r
+    return _Result(r)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -242,7 +240,6 @@ def bias_variance(
     color:               str           = DEFAULT_COLORS[0],
     figsize:             tuple         = (8, 5),
     save_path:           Optional[str] = None,
-    return_data:         bool          = False,
 ):
     """
     Full Bias–Variance analysis for one model: terminal stats + learning curve.
@@ -287,8 +284,7 @@ def bias_variance(
         print(f"  Saved → {save_path}")
     plt.show()
 
-    if return_data:
-        return r
+    return _Result(r)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -309,7 +305,6 @@ def compare_bias_variance(
     colors:              Optional[List] = None,
     figsize:             Optional[tuple]= None,
     save_path:           Optional[str]  = None,
-    return_data:         bool           = False,
 ):
     """
     Bias–Variance dashboard for multiple models.
@@ -402,8 +397,7 @@ def compare_bias_variance(
         print(f"\n  Saved → {save_path}")
     plt.show()
 
-    if return_data:
-        return results
+    return _Result({k: _Result(v) for k, v in results.items()})
 
 
 # ══════════════════════════════════════════════════════════════════════════════

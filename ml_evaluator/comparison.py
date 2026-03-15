@@ -35,7 +35,7 @@ from sklearn.metrics import (
 
 from ._utils import (
     get_colors, compute_metrics,
-    styled_box, add_panel_label,
+    styled_box, add_panel_label, _Result, _ResultDF,
 )
 
 warnings.filterwarnings("ignore")
@@ -89,8 +89,7 @@ def compare_metrics(
     if verbose:
         _print_comparison(df)
 
-    if return_data:
-        return df
+    return _ResultDF(df)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -137,8 +136,7 @@ def compare_interpret(
             for line in text.splitlines():
                 print(f"     {line}")
 
-    if return_data:
-        return interpretations
+    return _Result(interpretations)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
