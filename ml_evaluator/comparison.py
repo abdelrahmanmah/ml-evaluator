@@ -60,7 +60,8 @@ def compare_metrics(
     y_test,
     *,
     verbose: bool = True,
-) -> pd.DataFrame:
+    return_data: bool = False,
+):
     """
     Compute and print metrics for all models.
     No plot — numbers and winner summary only.
@@ -88,7 +89,8 @@ def compare_metrics(
     if verbose:
         _print_comparison(df)
 
-    return df
+    if return_data:
+        return df
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -101,7 +103,8 @@ def compare_interpret(
     y_test,
     *,
     verbose: bool = True,
-) -> Dict[str, str]:
+    return_data: bool = False,
+):
     """
     Print a plain-English interpretation for each model.
     No plot — text only.
@@ -134,7 +137,8 @@ def compare_interpret(
             for line in text.splitlines():
                 print(f"     {line}")
 
-    return interpretations
+    if return_data:
+        return interpretations
 
 
 # ══════════════════════════════════════════════════════════════════════════════

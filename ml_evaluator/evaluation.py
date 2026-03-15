@@ -31,12 +31,14 @@ __all__ = [
 
 # ── 1. metrics() ──────────────────────────────────────────────────────────────
 
-def metrics(model, X_test, y_test, *, model_name="Model", verbose=True) -> dict:
-    """Compute and print metrics. No plot. Returns dict."""
+def metrics(model, X_test, y_test, *, model_name="Model", verbose=True, return_data=False):
+    """Compute and print metrics. No plot.
+    Returns dict if return_data=True, else None."""
     m = compute_metrics(model, X_test, y_test)
     if verbose:
         _print_metrics(model_name, m)
-    return m
+    if return_data:
+        return m
 
 
 # ── 2. interpret() ────────────────────────────────────────────────────────────

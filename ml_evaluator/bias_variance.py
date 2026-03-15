@@ -102,7 +102,8 @@ def bv_stats(
     overfit_threshold:   float = OVERFIT_THRESHOLD,
     high_bias_threshold: float = HIGH_BIAS_THRESHOLD,
     verbose:             bool  = True,
-) -> dict:
+    return_data:         bool  = False,
+):
     """
     Compute and print Bias–Variance stats for one model.
     No plot — numbers and diagnosis only.
@@ -120,15 +121,16 @@ def bv_stats(
     overfit_threshold   : train−val gap above which → Overfit
     high_bias_threshold : val error rate above which → Underfit
     verbose             : if False, suppresses terminal output
+    return_data         : if True, returns the results dict (default False)
 
     Returns
     -------
-    dict  {lc_sizes, lc_train, lc_val, mean_train, mean_val, val_std,
-           gap, bias_proxy, diagnosis, explanation}
+    None by default. dict if return_data=True.
 
     Example
     -------
-    >>> r = ml_evaluator.bv_stats(rf, X_train, y_train, model_name="Random Forest")
+    >>> ev.bv_stats(rf, X_train, y_train)                        # prints only
+    >>> r = ev.bv_stats(rf, X_train, y_train, return_data=True)  # prints + returns
     >>> print(r["diagnosis"])
     """
     if train_sizes is None:
@@ -141,7 +143,8 @@ def bv_stats(
     if verbose:
         _print_bv(model_name, r)
 
-    return r
+    if return_data:
+        return r
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -239,23 +242,24 @@ def bias_variance(
     color:               str           = DEFAULT_COLORS[0],
     figsize:             tuple         = (8, 5),
     save_path:           Optional[str] = None,
-) -> None:
+    return_data:         bool          = False,
+):
     """
     Full Bias–Variance analysis for one model: terminal stats + learning curve.
 
-    Equivalent to calling bv_stats() then plot_learning_curve().
-
     Parameters
     ----------
-    (same as plot_learning_curve)
+    (same as bv_stats + plot_learning_curve)
+    return_data : if True, returns the results dict (default False)
 
     Returns
     -------
-    dict  — same as bv_stats()
+    None by default. dict if return_data=True.
 
     Example
     -------
-    >>> ml_evaluator.bias_variance(rf, X_train, y_train, model_name="Random Forest")
+    >>> ev.bias_variance(rf, X_train, y_train)
+    >>> r = ev.bias_variance(rf, X_train, y_train, return_data=True)
     """
     if train_sizes is None:
         train_sizes = np.linspace(0.1, 1.0, 8)
@@ -283,6 +287,9 @@ def bias_variance(
         print(f"  Saved → {save_path}")
     plt.show()
 
+    if return_data:
+        return r
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 4.  compare_bias_variance()  — multi-model dashboard
@@ -302,30 +309,30 @@ def compare_bias_variance(
     colors:              Optional[List] = None,
     figsize:             Optional[tuple]= None,
     save_path:           Optional[str]  = None,
-) -> Dict:
+    return_data:         bool           = False,
+):
     """
     Bias–Variance dashboard for multiple models.
 
     Row 1 — Learning curve per model with diagnosis label.
     Row 2 — Bar charts: Bias Proxy · Variance · Overfitting Gap.
 
-    Also prints a full terminal report.
-
     Parameters
     ----------
-    models  : dict  {model_name: fitted sklearn estimator}
-    X_train : training features
-    y_train : training labels
-    (rest same as bias_variance)
+    models      : dict  {model_name: fitted sklearn estimator}
+    X_train     : training features
+    y_train     : training labels
+    return_data : if True, returns {model_name: result_dict} (default False)
 
     Returns
     -------
-    dict  {model_name: result_dict}
+    None by default. dict if return_data=True.
 
     Example
     -------
-    >>> results = ml_evaluator.compare_bias_variance(models, X_train, y_train)
-    >>> print(results["Random Forest"]["diagnosis"])
+    >>> ev.compare_bias_variance(models, X_train, y_train)
+    >>> bv = ev.compare_bias_variance(models, X_train, y_train, return_data=True)
+    >>> print(bv["Random Forest"]["diagnosis"])
     """
     if train_sizes is None:
         train_sizes = np.linspace(0.1, 1.0, 8)
@@ -394,6 +401,9 @@ def compare_bias_variance(
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
         print(f"\n  Saved → {save_path}")
     plt.show()
+
+    if return_data:
+        return results
 
 
 # ══════════════════════════════════════════════════════════════════════════════
