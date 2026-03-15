@@ -40,9 +40,9 @@ dependencies = [
 dev = ["pytest", "twine", "build"]
 
 [project.urls]
-Homepage   = "https://github.com/YOUR_USERNAME/ml-evaluator"
-Repository = "https://github.com/YOUR_USERNAME/ml-evaluator"
-Issues     = "https://github.com/YOUR_USERNAME/ml-evaluator/issues"
+Homepage   = "https://github.com/abdelrahmanmah/ml-evaluator"
+Repository = "https://github.com/abdelrahmanmah/ml-evaluator"
+Issues     = "https://github.com/abdelrahmanmah/ml-evaluator/issues"
 
 [tool.setuptools.packages.find]
 where   = ["."]
