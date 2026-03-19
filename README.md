@@ -1,18 +1,10 @@
-<div align="center">
+# ml-evaluator · Model Evaluation Toolkit
 
-# ml-evaluator
-
-**Stop copy-pasting evaluation code.**
-
-[![PyPI version](https://img.shields.io/pypi/v/ml-evaluator?color=2E75B6&labelColor=1a1a2e&style=for-the-badge)](https://pypi.org/project/ml-evaluator/)
-[![Python](https://img.shields.io/pypi/pyversions/ml-evaluator?color=2ECC71&labelColor=1a1a2e&style=for-the-badge)](https://pypi.org/project/ml-evaluator/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-E67E22?labelColor=1a1a2e&style=for-the-badge)](LICENSE)
+> Stop copy-pasting evaluation code. One import, one call.
 
 ```bash
 pip install ml-evaluator
 ```
-
-</div>
 
 ---
 
@@ -20,7 +12,7 @@ pip install ml-evaluator
 
 `ml-evaluator` turns model evaluation from a chore into a single function call.
 
-Every function is **standalone** — pass your model, `X_test`, and `y_test` and you're done. No pipelines to build, no intermediate objects to store, no boilerplate to copy.
+Every function is **standalone** — pass your model, `X_test`, and `y_test` and you're done. Works for **binary and multiclass** problems automatically.
 
 Built for people who:
 - know how to train a model but want clean, reproducible evaluation
@@ -50,8 +42,8 @@ Every piece of evaluation is its own function — use exactly what you need.
 ### 🔹 Single model — text output
 
 ```python
-ev.metrics(model, X_test, y_test)           # numbers only, no plot
-ev.interpret(model, X_test, y_test)         # plain-English interpretation, no plot
+ev.metrics(model, X_test, y_test)                # numbers only, no plot
+ev.interpret(model, X_test, y_test)              # plain-English interpretation, no plot
 ev.classification_report(model, X_test, y_test)  # classification report table, no plot
 ```
 
@@ -72,33 +64,18 @@ ev.classification_report(model, X_test, y_test)  # classification report table, 
 </details>
 
 <details>
-<summary>Example output — <code>ev.interpret()</code></summary>
+<summary>Example output — multiclass <code>ev.metrics()</code></summary>
 
 ```
-  Interpretation — Random Forest
-  ─────────────────────────────────────────────────────
-  ✅  Accuracy 0.963 — high overall correctness.
-  ✅  F1 0.963 — strong balance between precision and recall.
-  ✅  Precision (0.952) ≈ Recall (0.975) — well balanced.
-       AUC = 0.993 — Excellent. The model clearly separates the two classes.
-```
-
-</details>
-
-<details>
-<summary>Example output — <code>ev.classification_report()</code></summary>
-
-```
-  Classification Report — Random Forest
-  ────────────────────────────────────────────────────────
-  Class             Precision   Recall  F1-Score  Support
-  ────────────────────────────────────────────────────────
-  0                     0.970    0.952     0.961      100
-  1                     0.953    0.971     0.962      100
-  ────────────────────────────────────────────────────────
-  Accuracy                                 0.963      200
-  macro avg             0.961    0.962     0.961
-  weighted avg          0.961    0.962     0.961
+=======================================================
+  Model Summary — RF (4-class)
+  Task: Multiclass (4 classes: 0, 1, 2, 3)
+=======================================================
+  Accuracy  : 0.8708
+  F1        : 0.8524  (macro avg)
+  Precision : 0.8601  (macro avg)
+  Recall    : 0.8490  (macro avg)
+  ROC-AUC   : 0.9712  (macro OvR)
 ```
 
 </details>
@@ -126,7 +103,7 @@ Produces a **2×2 dashboard** in one figure:
 ```
 ┌─────────────────────┬─────────────────────┐
 │  A · Confusion      │  B · ROC Curve      │
-│      Matrix         │                     │
+│      Matrix         │   (OvR if multiclass│
 ├─────────────────────┼─────────────────────┤
 │  C · Metrics        │  D · Classification │
 │      Bar Chart      │      Report         │
@@ -140,9 +117,9 @@ Also prints metrics + interpretation to the terminal.
 ### 🔸 Bias–Variance — single model
 
 ```python
-ev.bv_stats(model, X_train, y_train)          # stats + diagnosis only, no plot
-ev.plot_learning_curve(model, X_train, y_train)   # learning curve plot only
-ev.bias_variance(model, X_train, y_train)     # stats + plot together
+ev.bv_stats(model, X_train, y_train)           # stats + diagnosis only, no plot
+ev.plot_learning_curve(model, X_train, y_train) # learning curve plot only
+ev.bias_variance(model, X_train, y_train)      # stats + plot together
 ```
 
 <details>
@@ -151,12 +128,12 @@ ev.bias_variance(model, X_train, y_train)     # stats + plot together
 ```
   ✅ Random Forest
      Train Acc : 1.0000
-     Val   Acc : 0.9359
-     Gap       : 0.0641   (threshold: 0.10)
-     Val Std   : 0.0167   (variance proxy)
+     Val   Acc : 0.9400
+     Gap       : 0.0600   (threshold: 0.10)
+     Val Std   : 0.0151   (variance proxy)
      Diagnosis : Good Fit
-     Train–val gap is 0.064 and val error is 0.064.
-     The model generalises well — no strong signs of overfit or underfit.
+     Train–val gap is 0.060 and val error is 0.060.
+     The model generalises well.
      → Next step: evaluate on the held-out test set.
 ```
 
@@ -170,23 +147,13 @@ ev.bias_variance(model, X_train, y_train)     # stats + plot together
 | `1 − val_accuracy > 0.15` | 🟡 Underfit | Model too simple to capture the pattern |
 | otherwise | ✅ Good Fit | Model generalises well |
 
-Thresholds are configurable:
-
-```python
-ev.bias_variance(
-    model, X_train, y_train,
-    overfit_threshold=0.05,      # stricter
-    high_bias_threshold=0.10,
-)
-```
-
 ---
 
 ### 🔸 Multiple models — text output
 
 ```python
-ev.compare_metrics(models, X_test, y_test)     # metrics table + winner per metric, no plot
-ev.compare_interpret(models, X_test, y_test)   # interpretation per model, no plot
+ev.compare_metrics(models, X_test, y_test)     # metrics table + winner per metric
+ev.compare_interpret(models, X_test, y_test)   # interpretation per model
 ```
 
 <details>
@@ -203,13 +170,9 @@ ev.compare_interpret(models, X_test, y_test)   # interpretation per model, no pl
 
   Winners by metric:
     Accuracy     → Random Forest        (0.9625)
-    F1           → Random Forest        (0.9634)
-    Precision    → Random Forest        (0.9518)
     Recall       → Logistic Regression  (0.9877)
-    ROC-AUC      → Random Forest        (0.9930)
 
   ✅  Overall recommendation: Random Forest
-      (weighted score — F1 & Recall weighted highest)
 ```
 
 </details>
@@ -233,35 +196,96 @@ ev.comparison_dashboard(models, X_test, y_test)
 ev.compare_bias_variance(models, X_train, y_train)
 ```
 
-`comparison_dashboard` — full **3-row dashboard**:
-```
-Row 1 — Confusion matrix per model
-Row 2 — Overlaid ROC curves  +  Metrics bar chart
-Row 3 — Colour-coded summary table (green = top, red = bottom)
+---
+
+### 🔺 Data utilities
+
+```python
+ev.is_imbalanced(y_train)
+ev.is_imbalanced(y_train, threshold=0.15, class_labels=["Not Churned", "Churned"])
 ```
 
-`compare_bias_variance` — two-row B-V dashboard:
+Detects class imbalance, prints a distribution table with a diagnosis, and draws a bar chart + pie chart.
+
+<details>
+<summary>Example output — <code>ev.is_imbalanced()</code></summary>
+
 ```
-Row 1 — Learning curve per model with diagnosis label
-Row 2 — Bias proxy  ·  Variance  ·  Overfitting gap comparison
+=======================================================
+  Class Distribution
+=======================================================
+  Class                Count        %
+  ──────────────────────────────────────
+  0                      850    85.0%  █████████████████████
+  1                      150    15.0%  ███
+
+  Min / Max ratio : 0.176  (threshold: 0.20)
+  🔴  Dataset is IMBALANCED
+
+  ⚠️   Accuracy can be misleading on imbalanced data.
+       → Use F1, Precision, Recall, or ROC-AUC instead.
+       → Consider: class_weight='balanced', SMOTE, or threshold tuning.
 ```
+
+</details>
+
+---
+
+## Multiclass support
+
+All functions **automatically detect** binary vs. multiclass — no extra parameters needed.
+
+| What changes | Binary | Multiclass |
+|---|---|---|
+| F1 / Precision / Recall | `average="binary"` | `average="macro"` |
+| ROC-AUC | from `predict_proba[:, 1]` | One-vs-Rest, macro |
+| ROC Curve | single curve | one per class + macro avg |
+| Confusion Matrix | 2×2 | N×N, auto-scaled |
+| Interpretation | precision vs recall balance | flags classes with low F1 |
+
+---
+
+## Controlling interpretation output
+
+Every function that prints results accepts `show_interpretation=True/False`:
+
+```python
+# Print interpretation alongside metrics
+ev.metrics(rf, X_test, y_test, show_interpretation=True)
+
+# Skip interpretation — just the numbers
+ev.bv_stats(rf, X_train, y_train, show_interpretation=False)
+
+# model_summary without the interpretation block
+ev.model_summary(rf, X_test, y_test, show_interpretation=False)
+```
+
+**Defaults:**
+
+| Function | `show_interpretation` default |
+|---|---|
+| `model_summary`, `bv_stats`, `bias_variance`, `plot_roc_curve` | `True` |
+| `metrics`, `plot_confusion_matrix`, `plot_metrics_bar`, `compare_metrics`, `comparison_dashboard` | `False` |
 
 ---
 
 ## All parameters
 
-### Single model functions
+### Single model
 
 ```python
-ev.metrics(model, X_test, y_test, model_name="Model", verbose=True)
-ev.interpret(model, X_test, y_test, model_name="Model", verbose=True)
-ev.classification_report(model, X_test, y_test, model_name="Model", class_labels=None)
+ev.metrics(model, X_test, y_test,
+    model_name="Model",
+    verbose=True,
+    show_interpretation=False,
+)
 
 ev.plot_confusion_matrix(model, X_test, y_test,
     model_name="Model",
-    class_labels=None,       # e.g. ["Not Churned", "Churned"]
+    class_labels=None,        # e.g. ["Not Churned", "Churned"]
     color="#2E75B6",
-    figsize=(5, 4.5),
+    figsize=None,             # auto-scaled based on number of classes
+    show_interpretation=False,
     save_path=None,
 )
 
@@ -269,6 +293,7 @@ ev.plot_roc_curve(model, X_test, y_test,
     model_name="Model",
     color="#2E75B6",
     figsize=(6, 5),
+    show_interpretation=True,
     save_path=None,
 )
 
@@ -276,6 +301,7 @@ ev.plot_metrics_bar(model, X_test, y_test,
     model_name="Model",
     color="#2E75B6",
     figsize=(7, 4),
+    show_interpretation=False,
     save_path=None,
 )
 
@@ -284,38 +310,27 @@ ev.model_summary(model, X_test, y_test,
     class_labels=None,
     color="#2E75B6",
     figsize=(14, 10),
+    show_interpretation=True,
     save_path=None,
 )
 ```
 
-### Bias–Variance functions
+### Bias–Variance
 
 ```python
 ev.bv_stats(model, X_train, y_train,
     model_name="Model",
     n_splits=5,
     random_state=42,
-    train_sizes=None,            # default: linspace(0.1, 1.0, 8)
+    train_sizes=None,             # default: linspace(0.1, 1.0, 8)
     scoring="accuracy",
     overfit_threshold=0.10,
     high_bias_threshold=0.15,
     verbose=True,
+    show_interpretation=True,
 )
 
-ev.plot_learning_curve(model, X_train, y_train,
-    model_name="Model",
-    n_splits=5,
-    random_state=42,
-    train_sizes=None,
-    scoring="accuracy",
-    overfit_threshold=0.10,
-    high_bias_threshold=0.15,
-    color="#2E75B6",
-    figsize=(8, 5),
-    save_path=None,
-)
-
-# bias_variance() accepts all parameters above
+# bias_variance() and plot_learning_curve() accept the same parameters
 ```
 
 ### Multi-model functions
@@ -323,17 +338,28 @@ ev.plot_learning_curve(model, X_train, y_train,
 ```python
 # All multi-model functions accept:
 models    = {"name": fitted_estimator, ...}   # required
-colors    = None     # list of colours, one per model
-figsize   = None     # auto-sized if not given
-save_path = None     # saves figure to this path
+colors    = None      # list of colours, one per model
+figsize   = None      # auto-sized if not given
+save_path = None
 
-# compare_metrics / compare_interpret also accept:
-verbose   = True
+# comparison_dashboard and plot_confusion_matrices also accept:
+class_labels         = None
+show_interpretation  = False   # comparison_dashboard only
 
-# plot_confusion_matrices / comparison_dashboard also accept:
-class_labels = None  # e.g. ["No", "Yes"]
+# compare_metrics also accepts:
+show_interpretation  = False
+```
 
-# compare_bias_variance also accepts all bv_stats parameters
+### Data utilities
+
+```python
+ev.is_imbalanced(y,
+    threshold=0.20,           # minority/majority ratio below which → imbalanced
+    class_labels=None,
+    show_interpretation=True,
+    figsize=(10, 4),
+    save_path=None,
+)
 ```
 
 ---
@@ -342,25 +368,16 @@ class_labels = None  # e.g. ["No", "Yes"]
 
 | Function | Returns |
 |---|---|
-| `metrics()` | `dict` — accuracy, f1, precision, recall, roc_auc, y_pred, y_prob, report |
-| `interpret()` | `str` — full interpretation text |
-| `bv_stats()` | `dict` — lc_sizes, lc_train, lc_val, mean_train, mean_val, val_std, gap, bias_proxy, diagnosis, explanation |
-| `compare_metrics()` | `pandas.DataFrame` — one row per model |
-| `compare_interpret()` | `dict` — {model_name: interpretation_string} |
-| all `plot_*` functions | `None` |
-| `model_summary()` | `None` |
-| `comparison_dashboard()` | `None` |
-| `bias_variance()` | `None` |
-| `compare_bias_variance()` | `None` |
+| `metrics()` | `Result` dict — `accuracy`, `f1`, `precision`, `recall`, `roc_auc`, `y_pred`, `y_prob`, `y_prob_multi`, `classes`, `multiclass`, `averaging`, `report` |
+| `interpret()` | `Result` — `{"text": ...}` |
+| `bv_stats()` / `bias_variance()` | `Result` dict — `mean_train`, `mean_val`, `gap`, `bias_proxy`, `val_std`, `diagnosis`, `explanation`, `lc_sizes`, `lc_train`, `lc_val` |
+| `compare_metrics()` | `Result` (DataFrame-like) — `df["F1"]`, `df["F1"].idxmax()`, etc. |
+| `compare_interpret()` | `Result` — `{model_name: text}` |
+| `compare_bias_variance()` | `Result` of Results — `cb["RF"]["diagnosis"]`, `cb["LR"]["gap"]`, etc. |
+| all `plot_*` and `*_dashboard` functions | `None` |
+| `is_imbalanced()` | `None` |
 
----
-
-## Roadmap
-
-- [ ] v1.2 — Threshold optimiser (best decision threshold for F1 / Recall)
-- [ ] v1.3 — Probability calibration plot (reliability diagram)
-- [ ] v1.4 — Feature importance comparison across models
-- [ ] v2.0 — Auto PDF report
+> **Note:** Result objects are silent in Jupyter — they never auto-display. Access data with `m["accuracy"]`, `bv["gap"]`, etc.
 
 ---
 
